@@ -9,8 +9,9 @@ class OutputGuardrail:
             raise ValueError("A grounded college-policy answer must include sources")
         if response.safety_status == "insufficient_evidence" and response.grounded:
             raise ValueError("An insufficient-evidence response cannot be grounded")
-        if response.tool_used != "College Policy RAG" and response.grounded:
-            raise ValueError("Only College Policy RAG responses may be marked grounded")
+        grounded_tools = {"College Policy RAG", "Learning Resource Tool"}
+        if response.tool_used not in grounded_tools and response.grounded:
+            raise ValueError("Only College Policy RAG and the curated Learning Resource Tool may be marked grounded")
         for source in response.sources:
             if not source.document_id or not source.document_title or not source.chunk_id:
                 raise ValueError("Source metadata is incomplete")

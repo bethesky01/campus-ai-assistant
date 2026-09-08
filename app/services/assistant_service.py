@@ -48,7 +48,11 @@ class AssistantService:
             return self._finish(sid, question, CLARIFICATION, route, "Clarification", False, safety_status="clarification_required")
         if route.intent == "learning_resource":
             result = get_tool("learning_resource").run(route.topic, question)
-            return self._finish(sid, question, result.answer, route, "Learning Resource Tool", False, metadata=result.data)
+            is_grounded = result.data.get("source_type") == "curated_learning_resource"
+            return self._finish(
+                sid, question, result.answer, route, "Learning Resource Tool",
+                is_grounded, metadata=result.data,
+            )
         if route.intent == "college_policy":
             contextual_question = self._contextual_query(question, history)
             documents = retrieve(contextual_question)

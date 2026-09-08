@@ -72,7 +72,7 @@ class PersonalDataResult(BaseModel):
 class ResourceRequest(BaseModel):
     section: Literal[
         "prerequisites", "learning_stages", "recommended_topics",
-        "projects", "next_steps", "full_resource",
+        "projects", "next_steps", "summary", "full_resource",
     ]
     confidence: float = Field(ge=0, le=1, description="Confidence from 0.0 to 1.0")
 

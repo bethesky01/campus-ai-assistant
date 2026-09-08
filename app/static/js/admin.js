@@ -9,6 +9,13 @@ const progressTitle = document.querySelector('#progress-title');
 const progressDetail = document.querySelector('#progress-detail');
 const pipelineSteps = [...document.querySelectorAll('#pipeline-steps li')];
 const stageOrder = ['validating', 'storing', 'extracting', 'safety', 'chunking', 'preparing', 'embedding', 'indexing', 'complete'];
+const stepStages = {
+  validate: ['validating', 'storing'],
+  split: ['extracting', 'safety', 'chunking', 'preparing'],
+  embed: ['embedding'],
+  store: ['indexing'],
+  ready: ['complete'],
+};
 
 fileInput.addEventListener('change', () => {
   document.querySelector('#file-name').textContent = fileInput.files[0]?.name || 'Choose a PDF';
@@ -25,13 +32,14 @@ function updateProgress(event) {
   progressBar.style.width = `${percent}%`;
   progressPercent.value = `${percent}%`;
   progressTrack.setAttribute('aria-valuenow', String(percent));
-  progressTitle.textContent = event.stage === 'complete' ? 'Vector database ready' : event.message;
   progressDetail.textContent = event.message;
   const current = stageOrder.indexOf(event.stage);
   pipelineSteps.forEach(step => {
-    const index = stageOrder.indexOf(step.dataset.stage);
-    step.classList.toggle('done', event.stage === 'complete' || index < current);
-    step.classList.toggle('active', index === current || (event.stage === 'preparing' && step.dataset.stage === 'chunking'));
+    const stages = stepStages[step.dataset.step];
+    const start = stageOrder.indexOf(stages[0]);
+    const end = stageOrder.indexOf(stages[stages.length - 1]);
+    step.classList.toggle('done', event.stage === 'complete' || current > end);
+    step.classList.toggle('active', current >= start && current <= end);
   });
   if (event.stage === 'complete') progressPanel.classList.add('complete');
 }
@@ -74,7 +82,10 @@ uploadForm.addEventListener('submit', async event => {
     let streamError = null;
     await readProgressStream(response, eventData => {
       if (eventData.type === 'progress') updateProgress(eventData);
-      if (eventData.type === 'result') data = eventData.document;
+      if (eventData.type === 'result') {
+        data = eventData.document;
+        updateProgress({stage: 'complete', percent: 100, message: `Knowledge base ready with ${data.chunk_count} chunks`});
+      }
       if (eventData.type === 'error') streamError = eventData.message;
     });
     if (streamError) throw new Error(streamError);

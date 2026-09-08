@@ -52,6 +52,24 @@ def test_clear_resource_section_is_deterministic(monkeypatch):
     assert "Networking basics" in result.answer and "Stage 1" not in result.answer
 
 
+def test_broad_learning_request_returns_grounded_summary_without_llm(monkeypatch):
+    monkeypatch.setattr("app.tools.learning_resource_tool.get_llm", lambda: (_ for _ in ()).throw(AssertionError("LLM should not run")))
+    result = get_tool("learning_resource").run("python", "I want to learn Python, what do I need?")
+    assert result.data["requested_section"] == "summary"
+    assert result.data["source_type"] == "curated_learning_resource"
+    assert result.data["source_file"] == "python.json"
+    assert "What you need before starting" in result.answer
+    assert "Learning path" in result.answer
+    assert "Practice projects" in result.answer
+    assert "Recommended next step" in result.answer
+
+
+def test_explicit_complete_roadmap_returns_all_sections():
+    result = get_tool("learning_resource").run("python", "Give me the complete Python roadmap")
+    assert result.data["requested_section"] == "full_resource"
+    assert "Recommended topics" in result.answer and "Projects:" in result.answer and "Next steps" in result.answer
+
+
 def test_unclear_resource_request_uses_qwen_section_classification(monkeypatch):
     class Structured:
         def invoke(self, messages): return ResourceRequest(section="prerequisites", confidence=.91)
@@ -95,6 +113,8 @@ def test_learning_path_and_history():
     service = AssistantService(sessions, FixedRouter(route))
     response = service.respond("How do I learn Python?", "s1")
     assert response.tool_used == "Learning Resource Tool" and response.session_id == "s1"
+    assert response.grounded is True
+    assert response.metadata["source_type"] == "curated_learning_resource"
     assert len(sessions.history("s1")) == 2
 
 

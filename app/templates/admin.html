@@ -27,20 +27,21 @@
       <div class="notice" id="upload-status" hidden></div>
       <section class="ingestion-progress" id="ingestion-progress" hidden aria-live="polite">
         <div class="progress-heading">
-          <div><span class="progress-kicker">VECTOR DATABASE PIPELINE</span><strong id="progress-title">Preparing upload</strong></div>
+          <div><span class="progress-kicker">LIVE BACKGROUND PROCESS</span><strong id="progress-title">Building the RAG knowledge base</strong><p id="progress-detail">Waiting to begin...</p></div>
           <output id="progress-percent">0%</output>
         </div>
         <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="progress-bar"></span></div>
         <ol class="pipeline-steps" id="pipeline-steps">
-          <li data-stage="validating"><span>1</span><div><strong>Validate</strong><small>Check file and metadata</small></div></li>
-          <li data-stage="storing"><span>2</span><div><strong>Store</strong><small>Save PDF locally</small></div></li>
-          <li data-stage="extracting"><span>3</span><div><strong>Extract</strong><small>Read text and pages</small></div></li>
-          <li data-stage="safety"><span>4</span><div><strong>Safety scan</strong><small>Inspect untrusted content</small></div></li>
-          <li data-stage="chunking"><span>5</span><div><strong>Chunk</strong><small>Create passages</small></div></li>
-          <li data-stage="embedding"><span>6</span><div><strong>Embed</strong><small>Generate vectors</small></div></li>
-          <li data-stage="indexing"><span>7</span><div><strong>Index</strong><small>Commit to ChromaDB</small></div></li>
+          <li data-step="validate"><span>1</span><div><strong>Validate &amp; upload</strong><small>Safe PDF document</small></div></li>
+          <li data-step="split"><span>2</span><div><strong>Load &amp; split</strong><small>Pages and chunks</small></div></li>
+          <li data-step="embed"><span>3</span><div><strong>Create embeddings</strong><small>EmbeddingGemma</small></div></li>
+          <li data-step="store"><span>4</span><div><strong>Vector storage</strong><small>ChromaDB + metadata</small></div></li>
+          <li data-step="ready"><span>5</span><div><strong>Ready for retrieval</strong><small>Assistant can search</small></div></li>
         </ol>
-        <p class="progress-detail" id="progress-detail">Waiting to begin...</p>
+        <div class="retrieval-preview" aria-label="Retrieval flow available after indexing">
+          <span class="retrieval-label">AFTER INDEXING</span>
+          <div><span>Student question</span><b>&rarr;</b><span>Embedding</span><b>&rarr;</b><span>Vector search</span><b>&rarr;</b><span>Context + sources</span><b>&rarr;</b><span>Qwen3 answer</span></div>
+        </div>
       </section>
     </section>
     <section class="panel">
