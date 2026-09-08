@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Student Assistant · Campus AI{% endblock %}
+{% block body_class %}student-page{% endblock %}
+{% block content %}
+<main class="chat-shell">
+  <section class="hero" id="welcome">
+    <span class="eyebrow">DEMO INSTITUTE OF TECHNOLOGY</span>
+    <h1>Your campus answers,<br><em>grounded in policy.</em></h1>
+    <p>Ask about attendance, examinations, placements, or internships. Answers come only from documents indexed by your college administrator.</p>
+    <div class="suggestions">
+      <button>What is the minimum attendance requirement?</button>
+      <button>What are the examination eligibility rules?</button>
+      <button>What are the placement eligibility criteria?</button>
+      <button>What documents are required for placement registration?</button>
+      <button>Give me a Generative AI roadmap.</button>
+      <button>What are embeddings?</button>
+    </div>
+  </section>
+  <section class="conversation" id="conversation" aria-live="polite"></section>
+  <form class="composer" id="chat-form">
+    <label class="sr-only" for="question">Ask a college policy question</label>
+    <textarea id="question" maxlength="2000" rows="1" placeholder="Ask a question about college policy…" required></textarea>
+    <button type="submit" aria-label="Send question">→</button>
+    <p>Responses are generated from indexed college documents and may contain errors.</p>
+  </form>
+  <details class="safety-note"><summary>AI Safety &amp; Limitations</summary><p>AI answers can contain errors. Selected student IDs, phone numbers, and emails are redacted before AI processing, but detection is not comprehensive. Policy answers are intended to use indexed documents, and missing evidence should cause abstention. Prompt-injection detection is not perfect. Uploaded documents are treated as untrusted reference data. Verify important information against official college sources.</p></details>
+</main>
+{% endblock %}
+{% block scripts %}<script src="/static/js/chat.js" defer></script>{% endblock %}

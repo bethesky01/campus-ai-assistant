@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Admin Knowledge Base · Campus AI{% endblock %}
+{% block body_class %}admin-page{% endblock %}
+{% block content %}
+<main class="admin-shell">
+  <aside class="admin-side">
+    <span class="eyebrow">LOCAL PROTOTYPE</span>
+    <h1>Admin<br>Knowledge Base</h1>
+    <p>Manage the trusted documents that ground student answers.</p>
+    <a href="/">← Open student assistant</a>
+  </aside>
+  <section class="admin-content">
+    <header class="page-heading"><div><span class="eyebrow">KNOWLEDGE OPERATIONS</span><h2>Document library</h2></div><span class="local-badge">● Local AI</span></header>
+    <div class="stats">
+      <article><strong>{{ documents|length }}</strong><span>Total documents</span></article>
+      <article><strong>{{ indexed_count }}</strong><span>Indexed documents</span></article>
+      <article><strong>{{ total_chunks }}</strong><span>Knowledge chunks</span></article>
+    </div>
+    <section class="panel upload-panel">
+      <div><h3>Add knowledge</h3><p>Upload a text-based PDF. It will be stored and indexed locally.</p></div>
+      <form id="upload-form">
+        <label>Document title<input name="title" maxlength="200" placeholder="Placement Guidelines 2026" required></label>
+        <label>Category<select name="category" required>{% for category in categories %}<option>{{ category }}</option>{% endfor %}</select></label>
+        <label class="file-field">PDF file<input name="file" type="file" accept="application/pdf,.pdf" required><span id="file-name">Choose a PDF</span></label>
+        <button class="primary" type="submit">Upload &amp; Process</button>
+      </form>
+      <div class="notice" id="upload-status" hidden></div>
+      <section class="ingestion-progress" id="ingestion-progress" hidden aria-live="polite">
+        <div class="progress-heading">
+          <div><span class="progress-kicker">VECTOR DATABASE PIPELINE</span><strong id="progress-title">Preparing upload</strong></div>
+          <output id="progress-percent">0%</output>
+        </div>
+        <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="progress-bar"></span></div>
+        <ol class="pipeline-steps" id="pipeline-steps">
+          <li data-stage="validating"><span>1</span><div><strong>Validate</strong><small>Check file and metadata</small></div></li>
+          <li data-stage="storing"><span>2</span><div><strong>Store</strong><small>Save PDF locally</small></div></li>
+          <li data-stage="extracting"><span>3</span><div><strong>Extract</strong><small>Read text and pages</small></div></li>
+          <li data-stage="safety"><span>4</span><div><strong>Safety scan</strong><small>Inspect untrusted content</small></div></li>
+          <li data-stage="chunking"><span>5</span><div><strong>Chunk</strong><small>Create passages</small></div></li>
+          <li data-stage="embedding"><span>6</span><div><strong>Embed</strong><small>Generate vectors</small></div></li>
+          <li data-stage="indexing"><span>7</span><div><strong>Index</strong><small>Commit to ChromaDB</small></div></li>
+        </ol>
+        <p class="progress-detail" id="progress-detail">Waiting to begin...</p>
+      </section>
+    </section>
+    <section class="panel">
+      <div class="panel-title"><div><h3>Knowledge Base</h3><p>Each document can be safely re-indexed or removed.</p></div></div>
+      <div class="table-wrap"><table><thead><tr><th>Document</th><th>Category</th><th>Status</th><th>Safety</th><th>Pages</th><th>Chunks</th><th>Actions</th></tr></thead>
+      <tbody>{% for doc in documents %}<tr data-id="{{ doc.document_id }}"><td><strong>{{ doc.title }}</strong><small>{{ doc.filename }}</small></td><td>{{ doc.category }}</td><td><span class="status {{ doc.status }}">{{ doc.status|title }}</span>{% if doc.error %}<small title="{{ doc.error }}">Index error</small>{% endif %}</td><td><span class="status {{ 'failed' if doc.safety_flags else 'indexed' }}">{{ doc.safety_status|replace('_', ' ')|title }}</span>{% if doc.safety_flags %}<small>{{ doc.safety_flags|join(', ') }}</small>{% endif %}</td><td>{{ doc.page_count }}</td><td>{{ doc.chunk_count }}</td><td class="actions"><button data-action="reindex">Re-index</button><button class="danger" data-action="delete">Delete</button></td></tr>{% else %}<tr><td colspan="7" class="empty">No documents yet. Upload your first college policy above.</td></tr>{% endfor %}</tbody></table></div>
+    </section>
+  </section>
+</main>
+{% endblock %}
+{% block scripts %}<script src="/static/js/admin.js" defer></script>{% endblock %}
